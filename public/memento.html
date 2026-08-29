@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Memento — Collect Memories</title>
+<meta name="description" content="Preserve your letters, notes, and cherished moments in one timeless space." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        },
+        colors: {
+          background: 'oklch(0.14 0.05 25)',
+          foreground: 'oklch(0.94 0.02 60)',
+          card: 'oklch(0.18 0.06 25)',
+          muted: 'oklch(0.22 0.05 25)',
+          mutedfg: 'oklch(0.68 0.06 60)',
+          border: 'oklch(0.28 0.05 25)',
+          primary: 'oklch(0.72 0.12 60)',
+          accent: 'oklch(0.65 0.14 85)',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html, body { background: oklch(0.14 0.05 25); color: oklch(0.94 0.02 60); font-family: 'Inter', sans-serif; }
+  .font-serif { font-family: 'Playfair Display', serif; }
+  html { scroll-behavior: smooth; }
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(2rem); filter: blur(6px); transition: all 900ms cubic-bezier(.2,.7,.2,1); }
+  .reveal.shown { opacity: 1; transform: none; filter: blur(0); }
+  /* Custom cursor */
+  @media (pointer: fine) {
+    body { cursor: none; }
+    a, button, label, [data-cursor="hover"] { cursor: none; }
+  }
+  #cursor-dot, #cursor-ring {
+    position: fixed; left: 0; top: 0; pointer-events: none; z-index: 100;
+    mix-blend-mode: difference; transition: transform .15s, background-color .2s, border-color .2s, opacity .3s;
+  }
+  #cursor-dot { width: 6px; height: 6px; border-radius: 9999px; background: oklch(0.72 0.12 60); }
+  #cursor-ring { width: 32px; height: 32px; border-radius: 9999px; border: 1px solid oklch(0.72 0.12 60 / .6); }
+  @keyframes bounce-y { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+  .animate-bounce-y { animation: bounce-y 1.6s ease-in-out infinite; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<!-- NAV -->
+<nav id="nav" class="fixed top-0 inset-x-0 z-50 transition-all duration-500 py-5">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 md:px-12">
+    <a href="#hero" class="group flex items-center gap-2">
+      <svg class="h-5 w-5 text-primary transition-transform duration-500 group-hover:-rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>
+      <span class="font-serif text-sm tracking-[0.3em] uppercase">Memento</span>
+    </a>
+    <div class="hidden md:flex items-center gap-1" id="nav-links">
+      <a href="#story" data-nav="story" class="nav-link relative px-4 py-2 text-xs tracking-[0.25em] uppercase text-mutedfg hover:text-foreground transition">Story<span class="underline-bar absolute left-1/2 bottom-1 h-px bg-primary w-0 opacity-0 -translate-x-1/2 transition-all duration-500"></span></a>
+      <a href="#gallery" data-nav="gallery" class="nav-link relative px-4 py-2 text-xs tracking-[0.25em] uppercase text-mutedfg hover:text-foreground transition">Gallery<span class="underline-bar absolute left-1/2 bottom-1 h-px bg-primary w-0 opacity-0 -translate-x-1/2 transition-all duration-500"></span></a>
+      <a href="#dates" data-nav="dates" class="nav-link relative px-4 py-2 text-xs tracking-[0.25em] uppercase text-mutedfg hover:text-foreground transition">Dates<span class="underline-bar absolute left-1/2 bottom-1 h-px bg-primary w-0 opacity-0 -translate-x-1/2 transition-all duration-500"></span></a>
+    </div>
+    <a href="#story" class="hidden md:inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[10px] tracking-[0.3em] uppercase text-mutedfg hover:text-foreground hover:border-primary transition">Explore</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+  <div class="absolute inset-0 z-0">
+    <div id="hero-bg" class="h-full w-full transition-transform duration-700 ease-out"
+         style="background: radial-gradient(ellipse at 50% 40%, oklch(0.35 0.1 30 / .8), transparent 60%), radial-gradient(ellipse at 30% 70%, oklch(0.28 0.08 40 / .6), transparent 55%), oklch(0.14 0.05 25); opacity:.85;"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+  </div>
+  <div class="relative z-10 flex flex-col items-center px-6 text-center">
+    <p class="reveal mb-4 text-xs tracking-[0.3em] uppercase text-mutedfg">A Place for What Matters</p>
+    <h1 class="reveal font-serif text-5xl md:text-7xl lg:text-8xl leading-tight" style="transition-delay:150ms">
+      <span class="inline-block hover:text-primary transition-colors duration-500">Collect</span><br />
+      <span class="inline-block italic hover:text-primary transition-colors duration-500">Memories</span>
+    </h1>
+    <p class="reveal mt-6 max-w-md text-sm leading-relaxed text-mutedfg" style="transition-delay:300ms">
+      Preserve your letters, notes, and cherished moments in one timeless space. Every memory deserves to be remembered.
+    </p>
+    <a href="#story" class="reveal mt-10 flex h-12 w-12 items-center justify-center rounded-full border border-border text-mutedfg hover:text-foreground hover:border-primary hover:scale-110 transition-all duration-500" style="transition-delay:450ms">
+      <svg class="h-4 w-4 animate-bounce-y" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- STORY -->
+<section id="story" class="relative px-6 md:px-12 py-32">
+  <div class="mx-auto max-w-4xl">
+    <div class="reveal mb-16 text-center">
+      <p class="mb-3 text-xs tracking-[0.3em] uppercase text-primary">Our Story</p>
+      <h2 class="font-serif text-3xl md:text-5xl">Why We Created Memento</h2>
+    </div>
+    <div class="grid gap-12 md:grid-cols-3">
+      <div class="reveal group text-center rounded-xl p-6 hover:bg-card/40 hover:-translate-y-2 transition-all duration-500" data-cursor="hover">
+        <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-border group-hover:border-primary group-hover:bg-primary/10 group-hover:rotate-6 transition-all duration-500">
+          <svg class="h-5 w-5 text-primary group-hover:scale-125 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3 class="mb-3 font-serif text-lg">Preserve Love</h3>
+        <p class="text-sm text-mutedfg leading-relaxed">Save love letters, handwritten notes, and tokens of affection that tell your unique story.</p>
+      </div>
+      <div class="reveal group text-center rounded-xl p-6 hover:bg-card/40 hover:-translate-y-2 transition-all duration-500" data-cursor="hover" style="transition-delay:150ms">
+        <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-border group-hover:border-primary group-hover:bg-primary/10 group-hover:rotate-6 transition-all duration-500">
+          <svg class="h-5 w-5 text-primary group-hover:scale-125 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3 class="mb-3 font-serif text-lg">Keep a Journal</h3>
+        <p class="text-sm text-mutedfg leading-relaxed">Document daily reflections, travel memories, and milestones in your personal living archive.</p>
+      </div>
+      <div class="reveal group text-center rounded-xl p-6 hover:bg-card/40 hover:-translate-y-2 transition-all duration-500" data-cursor="hover" style="transition-delay:300ms">
+        <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-border group-hover:border-primary group-hover:bg-primary/10 group-hover:rotate-6 transition-all duration-500">
+          <svg class="h-5 w-5 text-primary group-hover:scale-125 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <h3 class="mb-3 font-serif text-lg">Mark the Dates</h3>
+        <p class="text-sm text-mutedfg leading-relaxed">Never forget the moments that shaped you. Important dates, anniversaries, and turning points.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" class="relative px-6 md:px-12 py-32">
+  <div class="mx-auto max-w-6xl">
+    <div class="reveal mb-12 text-center">
+      <p class="mb-3 text-xs tracking-[0.3em] uppercase text-primary">Collection</p>
+      <h2 class="font-serif text-3xl md:text-5xl">The Gallery</h2>
+      <p class="mx-auto mt-4 max-w-lg text-sm text-mutedfg leading-relaxed">Add your own photos, letters, and mementos. They stay in your browser.</p>
+    </div>
+
+    <div class="reveal mb-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <label for="photo-input" data-cursor="hover" class="inline-flex items-center gap-2 rounded-full border border-primary/60 bg-primary/10 px-6 py-3 text-xs tracking-[0.3em] uppercase text-foreground hover:bg-primary/20 hover:border-primary transition">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+        Add Photos
+      </label>
+      <input id="photo-input" type="file" accept="image/*" multiple class="hidden" />
+      <button id="clear-photos" data-cursor="hover" class="rounded-full border border-border px-6 py-3 text-xs tracking-[0.3em] uppercase text-mutedfg hover:text-foreground hover:border-primary transition">Clear All</button>
+    </div>
+
+    <div id="gallery-grid" class="grid gap-6 sm:grid-cols-2 md:grid-cols-3"></div>
+
+    <div id="gallery-empty" class="reveal mt-6 rounded-xl border border-dashed border-border/60 p-16 text-center text-sm text-mutedfg">
+      Your gallery is empty. Click <span class="text-foreground">Add Photos</span> or drag &amp; drop image files here.
+    </div>
+  </div>
+</section>
+
+<!-- DATES -->
+<section id="dates" class="relative px-6 md:px-12 py-32">
+  <div class="mx-auto max-w-3xl">
+    <div class="reveal mb-16 text-center">
+      <p class="mb-3 text-xs tracking-[0.3em] uppercase text-primary">Timeline</p>
+      <h2 class="font-serif text-3xl md:text-5xl">Important Dates</h2>
+      <p class="mx-auto mt-4 max-w-lg text-sm text-mutedfg leading-relaxed">Mark the milestones that matter. Birthdays, anniversaries, first meetings, and farewells.</p>
+    </div>
+    <div class="relative">
+      <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border to-transparent"></div>
+      <div id="timeline"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-border px-6 md:px-12 py-12">
+  <div class="mx-auto flex max-w-6xl flex-col md:flex-row items-center justify-between gap-4">
+    <span class="text-xs tracking-widest uppercase text-mutedfg">Memento</span>
+    <p class="text-xs text-mutedfg">Crafted for those who never want to forget.</p>
+  </div>
+</footer>
+
+<script>
+  // ===== Custom cursor =====
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  const pos = { x: innerWidth/2, y: innerHeight/2 };
+  const r = { x: pos.x, y: pos.y };
+  let hovering = false;
+  addEventListener('mousemove', (e) => {
+    pos.x = e.clientX; pos.y = e.clientY;
+    dot.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%,-50%)`;
+    const t = e.target.closest("a,button,input,label,textarea,select,[role='button'],[data-cursor='hover']");
+    hovering = !!t;
+    ring.style.backgroundColor = hovering ? 'oklch(0.72 0.12 60 / .25)' : 'transparent';
+  });
+  (function tick(){
+    r.x += (pos.x - r.x) * .18; r.y += (pos.y - r.y) * .18;
+    ring.style.transform = `translate(${r.x}px, ${r.y}px) translate(-50%,-50%) scale(${hovering?1.8:1})`;
+    requestAnimationFrame(tick);
+  })();
+
+  // ===== Nav scroll style + active section =====
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => {
+    if (scrollY > 20) nav.className = nav.className.replace('py-5','py-3'), nav.classList.add('backdrop-blur-xl','bg-background/70','border-b','border-border');
+    else nav.className = nav.className.replace('py-3','py-5'), nav.classList.remove('backdrop-blur-xl','bg-background/70','border-b','border-border');
+  }, { passive: true });
+
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.nav-link').forEach(a => {
+          const on = a.dataset.nav === e.target.id;
+          a.classList.toggle('text-foreground', on);
+          a.classList.toggle('text-mutedfg', !on);
+          const bar = a.querySelector('.underline-bar');
+          if (bar) { bar.style.width = on ? '1.5rem' : '0'; bar.style.opacity = on ? '1' : '0'; }
+        });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px' });
+  ['story','gallery','dates'].forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+
+  // ===== Reveal on scroll =====
+  const rio = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('shown'); rio.unobserve(e.target); }});
+  }, { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach(el => rio.observe(el));
+
+  // ===== Hero parallax =====
+  const heroBg = document.getElementById('hero-bg');
+  document.getElementById('hero').addEventListener('mousemove', (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5;
+    const y = (e.clientY - r.top) / r.height - .5;
+    heroBg.style.transform = `scale(1.1) translate(${x*-20}px, ${y*-20}px)`;
+  });
+
+  // ===== Gallery: add photos from local system =====
+  const grid = document.getElementById('gallery-grid');
+  const empty = document.getElementById('gallery-empty');
+  const input = document.getElementById('photo-input');
+  const clearBtn = document.getElementById('clear-photos');
+  const photos = []; // { url, name }
+
+  function render() {
+    grid.innerHTML = '';
+    photos.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'group relative overflow-hidden rounded-lg bg-card transition-all duration-700 hover:-translate-y-3 hover:shadow-2xl hover:shadow-primary/20';
+      card.setAttribute('data-cursor','hover');
+      card.innerHTML = `
+        <div class="aspect-[4/3] overflow-hidden">
+          <img src="${p.url}" alt="${p.name}" class="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-110" />
+          <div class="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </div>
+        <div class="p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs tracking-widest uppercase text-primary">Memory</p>
+            <h3 class="mt-2 font-serif text-lg truncate max-w-[220px]">${p.name}</h3>
+          </div>
+          <button data-remove="${i}" class="text-xs tracking-widest uppercase text-mutedfg hover:text-primary transition">Remove</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    empty.style.display = photos.length ? 'none' : '';
+  }
+
+  function addFiles(files) {
+    [...files].filter(f => f.type.startsWith('image/')).forEach(f => {
+      photos.push({ url: URL.createObjectURL(f), name: f.name });
+    });
+    render();
+  }
+
+  input.addEventListener('change', e => addFiles(e.target.files));
+  clearBtn.addEventListener('click', () => {
+    photos.forEach(p => URL.revokeObjectURL(p.url));
+    photos.length = 0; render();
+  });
+  grid.addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    const i = +btn.dataset.remove;
+    URL.revokeObjectURL(photos[i].url);
+    photos.splice(i, 1); render();
+  });
+
+  // Drag & drop anywhere on gallery
+  const gallerySection = document.getElementById('gallery');
+  ['dragover','dragenter'].forEach(ev => gallerySection.addEventListener(ev, e => { e.preventDefault(); gallerySection.classList.add('ring-1','ring-primary/40'); }));
+  ['dragleave','drop'].forEach(ev => gallerySection.addEventListener(ev, e => { e.preventDefault(); gallerySection.classList.remove('ring-1','ring-primary/40'); }));
+  gallerySection.addEventListener('drop', e => { if (e.dataTransfer?.files) addFiles(e.dataTransfer.files); });
+
+  render();
+
+  // ===== Timeline =====
+  const timelineData = [
+    { date: 'April 14, 2019', title: 'The First Letter', description: 'A handwritten note tucked inside a book. The beginning of something that would last forever.' },
+    { date: 'June 22, 2020', title: 'Our First Journey', description: 'A road trip with no destination. Just two souls, open roads, and endless conversations.' },
+    { date: 'December 3, 2021', title: 'The Promise', description: 'Under starlight, words were spoken that needed no paper to be remembered.' },
+    { date: 'September 10, 2023', title: 'A New Chapter', description: 'Sometimes the most important dates are the ones we write together.' },
+  ];
+  const tl = document.getElementById('timeline');
+  timelineData.forEach((it, i) => {
+    const even = i % 2 === 0;
+    const block = `
+      <div class="reveal relative mb-12 flex items-start gap-6 md:gap-0 ${even ? 'md:flex-row' : 'md:flex-row-reverse'}">
+        <div class="hidden md:block flex-1 ${even ? 'text-right pr-12' : 'text-left pl-12'}">
+          ${even ? renderDate(it) : ''}
+        </div>
+        <div class="group relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background hover:border-primary hover:scale-125 transition-all duration-500 md:mx-auto" data-cursor="hover">
+          <div class="h-2 w-2 rounded-full bg-primary group-hover:scale-150 transition-all duration-500" style="box-shadow:0 0 0 transparent"></div>
+        </div>
+        <div class="flex-1 md:hidden">${renderDate(it)}</div>
+        <div class="hidden md:block flex-1 ${even ? 'text-left pl-12' : 'text-right pr-12'}">
+          ${!even ? renderDate(it) : ''}
+        </div>
+      </div>`;
+    tl.insertAdjacentHTML('beforeend', block);
+  });
+  function renderDate(it) {
+    return `<p class="text-xs tracking-widest uppercase text-primary">${it.date}</p>
+      <h3 class="mt-1 font-serif text-xl">${it.title}</h3>
+      <p class="mt-2 text-sm text-mutedfg leading-relaxed">${it.description}</p>`;
+  }
+  document.querySelectorAll('#timeline .reveal').forEach(el => rio.observe(el));
+</script>
+</body>
+</html>
