@@ -12,6 +12,7 @@ const router = createRouter({
   context: { queryClient },
   scrollRestoration: true,
   defaultPreloadStaleTime: 0,
+  basepath: "/idlyvada",
 });
 
 declare module "@tanstack/react-router" {
@@ -26,4 +27,6 @@ if (!rootElement) {
   throw new Error("Root element #root was not found.");
 }
 
-ReactDOM.createRoot(rootElement).render(<RouterProvider router={router} />);
+ReactDOM.createRoot(rootElement).render(
+  <RouterProvider router={router} />
+);
